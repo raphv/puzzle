@@ -195,7 +195,7 @@
             
             document.addEventListener("touchmove", ev => {
                 if (moving_tile && ev.touches.length === 1) {
-                    continueMovement(ev.touches[0].clientX, ev.touches[1].clientY);
+                    continueMovement(ev.touches[0].clientX, ev.touches[0].clientY);
                     ev.preventDefault();
                 }
             });
