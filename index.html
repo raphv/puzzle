@@ -1,0 +1,208 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>SVG-based Puzzle</title>
+        <style>
+            #svg-image {
+                max-width: 100%;
+                background: #fcfffc;
+                display: block;
+                margin: auto;
+            }
+            .puzzle-piece:hover .puzzle-image {
+                opacity: .8;
+            }
+        </style>
+    </head>
+    <body>
+
+        <svg id="svg-image">
+            <defs id="svg-defs">
+                <image id="puzzle-image" href="lisbon.jpg" />
+                <path id="puzzle-piece" d="M10,10 h20v20h-20 C10,15,5,30,5,20C5,10,10,25,10,10 z" />
+                <clipPath id="puzzle-clip">
+                    <use href="#puzzle-piece" />
+                </clipPath>
+            </defs>
+            <rect id="background-canvas" fill="#e0f0e0" />
+            <g id="all-pieces"></g>
+            
+        </svg>
+        <script>
+            const SVG_IMAGE = document.getElementById('svg-image'),
+                BASE_WIDTH = 150,
+                BASE_HEIGHT = 150,
+                MARGIN = 100,
+                WIDTH_COUNT = 6,
+                HEIGHT_COUNT = 4,
+                IMAGE_WIDTH = BASE_WIDTH * WIDTH_COUNT,
+                IMAGE_HEIGHT = BASE_HEIGHT * HEIGHT_COUNT,
+                VP_WIDTH = IMAGE_WIDTH + 2 * MARGIN,
+                VP_HEIGHT = IMAGE_HEIGHT + 2 * MARGIN,
+                BG_CANVAS = document.getElementById('background-canvas'),
+                IMAGE_ELEMENT = document.getElementById('puzzle-image');
+            SVG_IMAGE.setAttribute('width', VP_WIDTH);
+            SVG_IMAGE.setAttribute('height', VP_HEIGHT);
+            SVG_IMAGE.setAttribute('viewBox', `${-MARGIN} ${-MARGIN} ${VP_WIDTH} ${VP_HEIGHT}`);
+            BG_CANVAS.setAttribute('width', IMAGE_WIDTH);
+            BG_CANVAS.setAttribute('height', IMAGE_HEIGHT);
+            IMAGE_ELEMENT.setAttribute('width', IMAGE_WIDTH);
+            IMAGE_ELEMENT.setAttribute('height', IMAGE_HEIGHT);
+            
+            let puzzle_vertical_positions = [];
+            for (let x = 0; x < WIDTH_COUNT - 1; x++) {
+                let col = [];
+                for (let y = 0; y < HEIGHT_COUNT; y++) {
+                    col.push(2*Math.floor(2*Math.random())-1);
+                }
+                puzzle_vertical_positions.push(col);
+            }
+            let puzzle_horizontal_positions = [];
+            for (let x = 0; x < WIDTH_COUNT; x++) {
+                let col = [];
+                for (let y = 0; y < HEIGHT_COUNT - 1; y++) {
+                    col.push(2*Math.floor(2*Math.random())-1);
+                }
+                puzzle_horizontal_positions.push(col);
+            }
+
+            let def_paths = '', all_pieces = '';
+
+            for (let x = 0; x < WIDTH_COUNT; x++) {
+                for (let y = 0; y < HEIGHT_COUNT; y++) {
+                    let top = y * BASE_HEIGHT,
+                        left = x * BASE_WIDTH,
+                        bottom = top + BASE_HEIGHT,
+                        right = left + BASE_WIDTH,
+                        centre_x = (left + right) / 2,
+                        centre_y = (top + bottom) / 2,
+                        left_notch = left,
+                        right_notch = right,
+                        top_notch = top,
+                        bottom_notch = bottom;
+                    if (x) {
+                        left_notch += BASE_WIDTH/4 * puzzle_vertical_positions[x-1][y];
+                    }
+                    if (x < (WIDTH_COUNT - 1)) {
+                        right_notch += BASE_WIDTH/4 * puzzle_vertical_positions[x][y];
+                    }
+                    if (y) {
+                        top_notch += BASE_HEIGHT/4 * puzzle_horizontal_positions[x][y-1];
+                    }
+                    if (y < (HEIGHT_COUNT - 1)) {
+                        bottom_notch += BASE_HEIGHT/4 * puzzle_horizontal_positions[x][y];
+                    }
+                    let d =
+                        `M${left},${top}C${(right*2+centre_x)/3},${top*2-top_notch},${left},${top_notch},${centre_x},${top_notch}`
+                        + `C${right},${top_notch},${(left*2+centre_x)/3},${top*2-top_notch},${right},${top}`
+
+                        + `C${right*2-right_notch},${(bottom*2+centre_y)/3},${right_notch},${top},${right_notch},${centre_y}`
+                        + `C${right_notch},${bottom},${right*2-right_notch},${(top*2+centre_y)/3},${right},${bottom}`
+
+                        + `C${(left*2+centre_x)/3},${bottom*2-bottom_notch},${right},${bottom_notch},${centre_x},${bottom_notch}`
+                        + `C${left},${bottom_notch},${(right*2+centre_x)/3},${bottom*2-bottom_notch},${left},${bottom}`
+
+                        + `C${left*2-left_notch},${(top*2+centre_y)/3},${left_notch},${bottom},${left_notch},${centre_y}`
+                        + `C${left_notch},${top},${left*2-left_notch},${(bottom*2+centre_y)/3},${left},${top}`;
+                    
+                    def_paths += `<path id="puzzle-path-${x}-${y}" d="${d}" />
+                        <clipPath id="puzzle-clip-${x}-${y}"><use href="#puzzle-path-${x}-${y}" />
+                    </clipPath>`;
+
+                    let new_centre_x = Math.random()*IMAGE_WIDTH,
+                        new_centre_y = Math.random()*IMAGE_HEIGHT;
+                    
+                    all_pieces += `<g id="puzzle-piece-${x}-${y}" class="puzzle-piece" transform="translate(${new_centre_x - centre_x}, ${new_centre_y-centre_y})">
+                        <use class="puzzle-line" href="#puzzle-path-${x}-${y}" fill="magenta" stroke="blue" stroke-width="3" />
+                        <g class="puzzle-image" clip-path="url(#puzzle-clip-${x}-${y})">
+                            <use href="#puzzle-image" />
+                        </g></g>`;
+
+                }
+            }
+
+            document.getElementById('svg-defs').innerHTML += def_paths;
+            document.getElementById('all-pieces').innerHTML += all_pieces;
+
+            let moving_tile = null,
+                tile_start_x = 0,
+                tile_start_y = 0,
+                pointer_start_x = 0,
+                pointer_start_y = 0;
+            
+            function getCoords() {
+                let res = moving_tile.getAttribute('transform').split(/[(),\s]/).filter(n => !isNaN(parseInt(n)));
+                if (res.length < 2) {
+                    return [0, 0];
+                } else {
+                    return res;
+                }
+            }
+
+            function startMovement(el, x, y) {
+                moving_tile = el;
+                let coords = getCoords(),
+                    line = moving_tile.querySelector('use.puzzle-line');
+                line.setAttribute('stroke', 'red');
+                tile_start_x = parseInt(coords[0]);
+                tile_start_y = parseInt(coords[1]);
+                pointer_start_x = x;
+                pointer_start_y = y;
+            }
+
+            function continueMovement(x, y) {
+                let scale = SVG_IMAGE.clientWidth / VP_WIDTH;
+                    new_x = (x - pointer_start_x) / scale + tile_start_x,
+                    new_y = (y - pointer_start_y) / scale + tile_start_y;
+                moving_tile.setAttribute('transform',`translate(${new_x},${new_y})`);
+            }
+
+            function endMovement() {
+                if (moving_tile) {
+                    let coords = getCoords(),
+                        line = moving_tile.querySelector('use.puzzle-line');
+                    if ((coords[0]**2 + coords[1]**2) < 25 ) {
+                        moving_tile.setAttribute('transform', '');
+                        line.setAttribute('stroke', 'none');
+                    } else {
+                        line.setAttribute('stroke', 'blue');
+                    }
+                }
+                moving_tile = null;
+            }
+
+            Array.from(document.querySelectorAll('g.puzzle-piece')).forEach(el => {
+                el.addEventListener("mousedown", ev => {
+                    startMovement(el, ev.clientX, ev.clientY);
+                    ev.preventDefault();
+                });
+                el.addEventListener("touchstart", ev => {
+                    if (ev.touches.length === 1) {
+                        startMovement(el, ev.touches[0].clientX, ev.touches[0].clientY);
+                        ev.preventDefault();
+                    }
+                });
+            });
+
+            document.addEventListener("mousemove", ev => {
+                if (moving_tile) {
+                    continueMovement(ev.clientX, ev.clientY);
+                    ev.preventDefault();
+                }
+            });
+            
+            document.addEventListener("touchmove", ev => {
+                if (moving_tile && ev.touches.length === 1) {
+                    continueMovement(ev.touches[0].clientX, ev.touches[1].clientY);
+                    ev.preventDefault();
+                }
+            });
+            
+            document.addEventListener("mouseup", endMovement);
+            document.addEventListener("touchend", endMovement);
+
+        </script>
+    </body>
+</html>
