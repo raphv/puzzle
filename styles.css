@@ -1,0 +1,82 @@
+
+* { margin:0; padding: 0; box-sizing: border-box;}
+body {
+  font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  text-align: center;
+  padding: 1em;
+}
+#top-section {
+    width: 100%;
+    display: flex;
+}
+#image-section {
+    width: 50%;
+    margin: .5em;
+}
+#image-dropzone {
+    border: 4px dashed #cccccc;
+    padding: 1em;
+}
+#image-status {
+    margin:  1em;
+    border:  1px solid;
+    padding:  .5em;
+    border-radius:  .2em;
+    text-align: left;
+}
+.waiting, .success, .error {
+    padding-left: 1.8em !important;
+    background-size: 1em;
+    background-position: .5em center;
+    background-repeat: no-repeat;
+}
+.waiting {
+    color: #cc8000;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512'%3E%3Cpath fill='%23cc8000' d='M360 0H24C10.745 0 0 10.745 0 24v16c0 13.255 10.745 24 24 24 0 90.965 51.016 167.734 120.842 192C75.016 280.266 24 357.035 24 448c-13.255 0-24 10.745-24 24v16c0 13.255 10.745 24 24 24h336c13.255 0 24-10.745 24-24v-16c0-13.255-10.745-24-24-24 0-90.965-51.016-167.734-120.842-192C308.984 231.734 360 154.965 360 64c13.255 0 24-10.745 24-24V24c0-13.255-10.745-24-24-24zm-75.078 384H99.08c17.059-46.797 52.096-80 92.92-80 40.821 0 75.862 33.196 92.922 80zm.019-256H99.078C91.988 108.548 88 86.748 88 64h208c0 22.805-3.987 44.587-11.059 64z'/%3E%3C/svg%3E");
+  }
+.success {
+    color: #008000;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' %3E%3Cpath fill='%23008000' d='M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z'/%3E%3C/svg%3E");
+}
+error {
+    color: #ff0000;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 352 512'%3E%3Cpath fill='%23ff0000' d='M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z'/%3E%3C/svg%3E");
+}
+#preview_frame {
+    display: block;
+    max-width: 600px;
+    margin: 10px auto;
+}
+#sliders {
+    width: 50%;
+    margin: .5em;
+}
+.slider-group {
+    display: flex;
+    justify-content: space-between;
+}
+.slider-group label {
+    width: 33%;
+}
+#privacy {
+    margin-top: 1em;
+    text-align: left;
+}
+#privacy ul {
+    list-style: none;
+}
+#play_link {
+    background: #ccffcc;
+    border: 1px solid #008000;
+    border-radius: .5em;
+    font-size: 1.2em;
+    max-width: 80%;
+    display: block;
+    margin: .5em auto;
+    padding: .5em;
+    color: #000020;
+}
+#play_link:hover {
+    background: #004000;
+    color: #ccffcc;
+}
