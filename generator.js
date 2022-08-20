@@ -287,7 +287,7 @@ function generate() {
     play_url = URL.createObjectURL(play_blob);
 
     document.getElementById('preview_frame').src = preview_url;
-    document.getElementById('play_link').href = play_url;
+    Array.from(document.querySelectorAll('.play-links a')).forEach(a => a.href = play_url);
 }
 
 

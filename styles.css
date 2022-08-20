@@ -8,10 +8,11 @@ body {
 #top-section {
     width: 100%;
     display: flex;
+    flex-wrap: wrap;
 }
-#image-section {
-    width: 50%;
+#image-section, #sliders {
     margin: .5em;
+    flex: 300px 1 1;
 }
 #image-dropzone {
     border: 4px dashed #cccccc;
@@ -47,10 +48,6 @@ error {
     max-width: 600px;
     margin: 10px auto;
 }
-#sliders {
-    width: 50%;
-    margin: .5em;
-}
 .slider-group {
     display: flex;
     justify-content: space-between;
@@ -65,18 +62,21 @@ error {
 #privacy ul {
     list-style: none;
 }
-#play_link {
+.play-links {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+.play-links a {
     background: #ccffcc;
     border: 1px solid #008000;
     border-radius: .5em;
-    font-size: 1.2em;
-    max-width: 80%;
-    display: block;
-    margin: .5em auto;
+    max-width: 40%;
+    margin: .5em;
     padding: .5em;
-    color: #000020;
+    color: #000040;
 }
-#play_link:hover {
+.play-links a:hover {
     background: #004000;
     color: #ccffcc;
 }
