@@ -3,7 +3,7 @@ const HTML_START = `<!doctype html>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>SVG-based Puzzle</title>
+        <title>Puzzle</title>
         <style>
             * {
                 margin: 0; padding: 0; border: none;
@@ -115,6 +115,7 @@ let preview_url = null,
     IMAGE_DATA = SAMPLE_IMAGE,
     SOURCE_WIDTH = 799,
     SOURCE_HEIGHT = 533,
+    never_compressed,
     BASE_WIDTH, BASE_HEIGHT, WIDTH_COUNT, HEIGHT_COUNT, MARGIN;
 
 function autoAdjustColumns() {
@@ -313,6 +314,7 @@ function openFile(file) {
     reader.readAsDataURL(file);
 }
 reader.addEventListener('load', function() {
+    never_compressed = true;
     IMAGE_DATA = reader.result;
     preview_image.src = IMAGE_DATA;
     showStatus('waiting', `Loaded image`);
@@ -320,9 +322,25 @@ reader.addEventListener('load', function() {
 preview_image.addEventListener('load', function() {
     SOURCE_WIDTH = preview_image.naturalWidth;
     SOURCE_HEIGHT = preview_image.naturalHeight;
-    showStatus('success', `Processed image`);
-    autoAdjustColumns();
-    generate();
+    let area = SOURCE_WIDTH * SOURCE_HEIGHT;
+    if ((area > 900**2 || IMAGE_DATA.length > 280000) && never_compressed) {
+        never_compressed = false;
+        showStatus('waiting', `Compressing image`);
+        let compression_scale = Math.min(1, (860**2/area)**.5),
+            new_width = Math.round(compression_scale * SOURCE_WIDTH),
+            new_height = Math.round(compression_scale * SOURCE_HEIGHT),
+            canvas = document.createElement('canvas'),
+            ctx = canvas.getContext('2d');
+        canvas.width = new_width;
+        canvas.height = new_height;
+        ctx.drawImage(preview_image, 0, 0, new_width, new_height);
+        IMAGE_DATA = canvas.toDataURL('image/jpeg', .75);
+        preview_image.src = IMAGE_DATA;
+    } else {
+        showStatus('success', `Processed image`);
+        autoAdjustColumns();
+        generate();
+    }
 });
 document.getElementById('image-dropzone').addEventListener('dragenter', function(event) {
   event.preventDefault();
